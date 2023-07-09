@@ -29,11 +29,12 @@ public class CategoriaActivity extends AppCompatActivity {
 
         categoriaDAO = new CategoriaDAO(this);
 
-        idCategoria = Integer.parseInt(getIntent().getExtras().getString("IdCategoria").toString());
-
-        if(idCategoria > -1)
-        {
-            RecuperarCategoria();
+        String idCategoriaStr = getIntent().getStringExtra("IdCategoria");
+        if (idCategoriaStr != null) {
+            idCategoria = Integer.parseInt(idCategoriaStr);
+            if (idCategoria != 0) {
+                RecuperarCategoria();
+            }
         }
     }
 

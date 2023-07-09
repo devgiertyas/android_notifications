@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CategoriaDAO extends SQLiteOpenHelper {
-        private static final String DATABASE_NAME = "categorias.db";
+        private static final String DATABASE_NAME = "tasktres.db";
         private static final int DATABASE_VERSION = 1;
 
         private static final String TABLE_CATEGORIAS = "categorias";

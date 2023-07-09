@@ -1,0 +1,81 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".TarefaActivity">
+
+    <EditText
+        android:id="@+id/editTextDescricao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Descrição" />
+
+    <Spinner
+        android:id="@+id/spinnerCategoria"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Categoria" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editTextDataInicial"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="date"
+            android:hint="Data Inicial" />
+
+        <EditText
+            android:id="@+id/editTextDataFinal"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:hint="Data Final"
+            android:onClick="showDateTimePicker" />
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/editTextObservacoes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Observações"
+        android:inputType="textMultiLine"
+        android:minLines="3" />
+
+    <LinearLayout
+        android:id="@+id/linearImagens"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/buttonAdicionarImagem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Adicionar Imagem" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewImagens"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/buttonSalvar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Salvar" />
+
+
+</LinearLayout>

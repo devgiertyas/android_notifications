@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         //INICIA O SERVIÇO PRA VERIFICAR OS AGENDAMOS
+        /*
         Intent serviceIntent = new Intent(this, ServiceNotification.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ContextCompat.startForegroundService(this, serviceIntent);
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             // Antes do Android 8.0, use startService()
             startService(serviceIntent);
         }
-        
+        */
 
         setSupportActionBar(binding.appBarMain.toolbar);
         binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
@@ -58,8 +59,8 @@ public class MainActivity extends AppCompatActivity {
                     // Item 1 do Navigation Drawer está ativo
                     Snackbar.make(view, "Ação do Item 1", Snackbar.LENGTH_LONG).show();
                 } else if (checkedItemId == R.id.nav_gallery) {
-                    // Item 2 do Navigation Drawer está ativo
-                    Snackbar.make(view, "Ação do Item 2", Snackbar.LENGTH_LONG).show();
+                    Intent intent = new Intent(MainActivity.this, TarefaActivity.class);
+                    startActivity(intent);
                 } else if (checkedItemId == R.id.nav_slideshow) {
                     Intent intent = new Intent(MainActivity.this, CategoriaActivity.class);
                     startActivity(intent);
