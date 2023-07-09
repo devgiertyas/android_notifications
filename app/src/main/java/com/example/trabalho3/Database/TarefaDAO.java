@@ -5,11 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import com.example.trabalho3.Models.Categoria;
 import com.example.trabalho3.Models.Imagem;
 import com.example.trabalho3.Models.Tarefa;
 
+import java.io.ByteArrayOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,7 +37,9 @@ public class TarefaDAO extends SQLiteOpenHelper {
 
     private static final String TABLE_TAREFA_IMAGEM = "tarefa_imagem";
     private static final String COLUMN_TAREFA_ID = "tarefa_id";
-    private static final String COLUMN_IMAGEM_PATH = "imagem_path";
+    private static final String COLUMN_IMAGEM_DATA = "imagem_data";
+    private static final String COLUMN_NOME = "nome";
+
     private Context context;
 
     public TarefaDAO(Context context) {
@@ -44,6 +49,11 @@ public class TarefaDAO extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        String createTableCategoria = "CREATE TABLE " + TABLE_CATEGORIA + "(" +
+                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_NOME + " TEXT" +
+                ")";
+
         String createTableTarefa = "CREATE TABLE " + TABLE_TAREFA + "(" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_DESCRICAO + " TEXT, " +
@@ -58,44 +68,51 @@ public class TarefaDAO extends SQLiteOpenHelper {
         String createTableTarefaImagem = "CREATE TABLE " + TABLE_TAREFA_IMAGEM + "(" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_TAREFA_ID + " INTEGER, " +
-                COLUMN_IMAGEM_PATH + " TEXT, " +
+                COLUMN_IMAGEM_DATA + " BLOB, " +
                 "FOREIGN KEY(" + COLUMN_TAREFA_ID + ") REFERENCES " + TABLE_TAREFA + "(" + COLUMN_ID + ")" +
                 ")";
 
+        db.execSQL(createTableCategoria);
         db.execSQL(createTableTarefa);
         db.execSQL(createTableTarefaImagem);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TAREFA);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TAREFA_IMAGEM);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TAREFA);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATEGORIA);
         onCreate(db);
     }
 
-    public void salvarTarefa(Tarefa tarefa) {
+    public int salvarTarefa(Tarefa tarefa) {
         SQLiteDatabase db = getWritableDatabase();
 
         // Salvar os dados da tarefa na tabela "tarefa"
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_DESCRICAO, tarefa.getDescricao());
-        values.put(COLUMN_OBSERVACOES, tarefa.getObservacoes());
-        values.put(COLUMN_DATA_INICIAL, formatarData(tarefa.getDataInicial()));
-        values.put(COLUMN_DATA_FINAL, formatarData(tarefa.getDataFinal()));
-        values.put(COLUMN_SITUACAO, tarefa.getSituacao());
-        values.put(COLUMN_CATEGORIA_ID, tarefa.getCategoria().getId());
+        ContentValues tarefaValues = new ContentValues();
+        tarefaValues.put(COLUMN_DESCRICAO, tarefa.getDescricao());
+        tarefaValues.put(COLUMN_OBSERVACOES, tarefa.getObservacoes());
+        tarefaValues.put(COLUMN_DATA_INICIAL, formatarData(tarefa.getDataInicial()));
+        tarefaValues.put(COLUMN_DATA_FINAL, formatarData(tarefa.getDataFinal()));
+        tarefaValues.put(COLUMN_SITUACAO, tarefa.getSituacao());
+        tarefaValues.put(COLUMN_CATEGORIA_ID, tarefa.getCategoria().getId());
 
-        long idTarefa = db.insert(TABLE_TAREFA, null, values);
+        int idTarefa = (int) db.insert(TABLE_TAREFA, null, tarefaValues);
 
         // Salvar as imagens da tarefa na tabela "tarefa_imagem"
         for (Imagem imagem : tarefa.getImagens()) {
+            byte[] imagemData = convertBitmapToByteArray(imagem.getBitmap());
+
             ContentValues imagemValues = new ContentValues();
             imagemValues.put(COLUMN_TAREFA_ID, idTarefa);
-            //imagemValues.put(COLUMN_IMAGEM_PATH, imagem.getBitmap());
+            imagemValues.put(COLUMN_IMAGEM_DATA, imagemData);
+
             db.insert(TABLE_TAREFA_IMAGEM, null, imagemValues);
         }
 
         db.close();
+
+        return  idTarefa;
     }
 
     public List<Tarefa> getTarefas() {
@@ -115,16 +132,12 @@ public class TarefaDAO extends SQLiteOpenHelper {
             String situacao = cursor.getString(cursor.getColumnIndex(COLUMN_SITUACAO));
             int categoriaId = cursor.getInt(cursor.getColumnIndex(COLUMN_CATEGORIA_ID));
 
-            // Obter a categoria da tarefa
             CategoriaDAO categoriaDAO = new CategoriaDAO(context);
             Categoria categoria = categoriaDAO.getCategoriaById(categoriaId);
 
-            // Obter as imagens da tarefa
-            List<String> imagens = getImagensByTarefaId(id);
+            List<Imagem> imagens = getImagensByTarefaId(id);
 
-            // Criar o objeto Tarefa com os dados do cursor
             Tarefa tarefa = new Tarefa(id, descricao, observacoes, dataInicial, dataFinal, situacao, categoria, imagens);
-
             tarefas.add(tarefa);
         }
 
@@ -149,22 +162,41 @@ public class TarefaDAO extends SQLiteOpenHelper {
         return format.format(data);
     }
 
-    private List<String> getImagensByTarefaId(int tarefaId) {
+    private List<Imagem> getImagensByTarefaId(int tarefaId) {
+        List<Imagem> imagens = new ArrayList<>();
+
         SQLiteDatabase db = getReadableDatabase();
-
         String query = "SELECT * FROM " + TABLE_TAREFA_IMAGEM + " WHERE " + COLUMN_TAREFA_ID + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(tarefaId)});
+        String[] selectionArgs = {String.valueOf(tarefaId)};
+        Cursor cursor = db.rawQuery(query, selectionArgs);
 
-        List<String> imagens = new ArrayList<>();
-
-        while (cursor.moveToNext()) {
-            String imagemPath = cursor.getString(cursor.getColumnIndex(COLUMN_IMAGEM_PATH));
-            imagens.add(imagemPath);
+        if (cursor.moveToFirst()) {
+            do {
+                byte[] imagemData = cursor.getBlob(cursor.getColumnIndex(COLUMN_IMAGEM_DATA));
+                Bitmap bitmap = BitmapFactory.decodeByteArray(imagemData, 0, imagemData.length);
+                Imagem imagem = new Imagem(bitmap);
+                imagens.add(imagem);
+            } while (cursor.moveToNext());
         }
 
         cursor.close();
-        db.close();
-
         return imagens;
     }
+
+    private byte[] convertBitmapToByteArray(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+    }
 }
+
+
+
+
+
+
+
+
+
+
+

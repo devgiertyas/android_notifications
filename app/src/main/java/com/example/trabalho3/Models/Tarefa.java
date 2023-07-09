@@ -13,22 +13,24 @@ public class Tarefa {
     private Categoria categoria;
     private List<Imagem> imagens;
 
-    public Tarefa(int id, String descricao, String observacoes, Date dataInicial, Date dataFinal, String situacao, Categoria categoria) {
+    public Tarefa(int id, String descricao, String observacoes, Date dataInicial, Date dataFinal, String situacao, Categoria categoria, List<Imagem> imagens) {
         this.descricao = descricao;
         this.observacoes = observacoes;
         this.dataInicial = dataInicial;
         this.dataFinal = dataFinal;
         this.situacao = situacao;
         this.categoria = categoria;
+        this.imagens = imagens;
     }
 
-    public Tarefa(String descricao, String observacoes, Date dataInicial, Date dataFinal, String situacao, Categoria categoria) {
+    public Tarefa(String descricao, String observacoes, Date dataInicial, Date dataFinal, String situacao, Categoria categoria, List<Imagem> imagens) {
         this.descricao = descricao;
         this.observacoes = observacoes;
         this.dataInicial = dataInicial;
         this.dataFinal = dataFinal;
         this.situacao = situacao;
         this.categoria = categoria;
+        this.imagens = imagens;
     }
 
     public int getId() {

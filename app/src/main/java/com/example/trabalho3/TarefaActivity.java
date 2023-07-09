@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -31,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.trabalho3.Adapters.CategoriaSpinnerAdapter;
 import com.example.trabalho3.Adapters.ImagemAdapter;
 import com.example.trabalho3.Database.CategoriaDAO;
+import com.example.trabalho3.Database.TarefaDAO;
 import com.example.trabalho3.Models.Categoria;
 import com.example.trabalho3.Models.Imagem;
 import com.example.trabalho3.Models.Tarefa;
@@ -64,6 +66,8 @@ public class TarefaActivity extends AppCompatActivity {
 
     private List<Categoria> listaCategorias;
     private CategoriaDAO categoriaDAO;
+
+    private TarefaDAO tarefaDAO;
 
 
     @Override
@@ -106,7 +110,7 @@ public class TarefaActivity extends AppCompatActivity {
             }
         });
 
-        EditText editTextDataInicial = findViewById(R.id.editTextDataInicial);
+        editTextDataInicial = findViewById(R.id.editTextDataInicial);
         editTextDataInicial.setInputType(InputType.TYPE_NULL);
         editTextDataInicial.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,7 +119,7 @@ public class TarefaActivity extends AppCompatActivity {
             }
         });
 
-        EditText editTextDataFinal = findViewById(R.id.editTextDataFinal);
+        editTextDataFinal = findViewById(R.id.editTextDataFinal);
         editTextDataFinal.setInputType(InputType.TYPE_NULL);
         editTextDataFinal.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -224,8 +228,8 @@ public class TarefaActivity extends AppCompatActivity {
 
         String observacoes = editTextObservacoes.getText().toString().trim();
 
-        String dataInicial = editTextDataInicial.getText().toString().trim();
-        String dataFinal = editTextDataFinal.getText().toString().trim();
+        String dataInicial = editTextDataInicial.getText().toString();
+        String dataFinal = editTextDataFinal.getText().toString();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         Date dataInicialParsed = null;
@@ -245,10 +249,19 @@ public class TarefaActivity extends AppCompatActivity {
         }
 
         Tarefa tarefa = new Tarefa(
-                descricao, observacoes,
+                descricao,
+                observacoes,
                 dataInicialParsed,
                 dataFinalParsed,
-                "teste", categoriaSelecionada );
+                "teste",
+                categoriaSelecionada,
+                listaImagens );
+
+        tarefaDAO = new TarefaDAO(getApplicationContext());
+
+        int idTarefe = tarefaDAO.salvarTarefa(tarefa);
+
+        Log.d("Tartega","salvarTarefa: " + idTarefe);
 
         /* Adicione a lista de imagens da tarefa (caminhos dos arquivos)
         List<String> imagens = imagemAdapter.getImagens();

@@ -19,24 +19,60 @@ public class CategoriaDAO extends SQLiteOpenHelper {
         private static final String COLUMN_ID = "id";
         private static final String COLUMN_NOME = "nome";
 
+    private static final String TABLE_CATEGORIA = "categorias";
+    private static final String TABLE_TAREFA = "tarefa";
+    private static final String COLUMN_DESCRICAO = "descricao";
+    private static final String COLUMN_OBSERVACOES = "observacoes";
+    private static final String COLUMN_DATA_INICIAL = "data_inicial";
+    private static final String COLUMN_DATA_FINAL = "data_final";
+    private static final String COLUMN_SITUACAO = "situacao";
+    private static final String COLUMN_CATEGORIA_ID = "categoria_id";
+
+    private static final String TABLE_TAREFA_IMAGEM = "tarefa_imagem";
+    private static final String COLUMN_TAREFA_ID = "tarefa_id";
+    private static final String COLUMN_IMAGEM_DATA = "imagem_data";
+
         public CategoriaDAO(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            String createTableQuery = "CREATE TABLE " + TABLE_CATEGORIAS + " (" +
+            String createTableCategoria = "CREATE TABLE " + TABLE_CATEGORIA + "(" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    COLUMN_NOME + " TEXT)";
-            db.execSQL(createTableQuery);
+                    COLUMN_NOME + " TEXT" +
+                    ")";
+
+            String createTableTarefa = "CREATE TABLE " + TABLE_TAREFA + "(" +
+                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_DESCRICAO + " TEXT, " +
+                    COLUMN_OBSERVACOES + " TEXT, " +
+                    COLUMN_DATA_INICIAL + " TEXT, " +
+                    COLUMN_DATA_FINAL + " TEXT, " +
+                    COLUMN_SITUACAO + " TEXT, " +
+                    COLUMN_CATEGORIA_ID + " INTEGER, " +
+                    "FOREIGN KEY(" + COLUMN_CATEGORIA_ID + ") REFERENCES " + TABLE_CATEGORIA + "(" + COLUMN_ID + ")" +
+                    ")";
+
+            String createTableTarefaImagem = "CREATE TABLE " + TABLE_TAREFA_IMAGEM + "(" +
+                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_TAREFA_ID + " INTEGER, " +
+                    COLUMN_IMAGEM_DATA + " BLOB, " +
+                    "FOREIGN KEY(" + COLUMN_TAREFA_ID + ") REFERENCES " + TABLE_TAREFA + "(" + COLUMN_ID + ")" +
+                    ")";
+
+            db.execSQL(createTableCategoria);
+            db.execSQL(createTableTarefa);
+            db.execSQL(createTableTarefaImagem);
         }
 
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            String dropTableQuery = "DROP TABLE IF EXISTS " + TABLE_CATEGORIAS;
-            db.execSQL(dropTableQuery);
-            onCreate(db);
-        }
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TAREFA_IMAGEM);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TAREFA);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATEGORIA);
+        onCreate(db);
+    }
 
         public void insertCategoria(Categoria categoria) {
             SQLiteDatabase db = getWritableDatabase();
