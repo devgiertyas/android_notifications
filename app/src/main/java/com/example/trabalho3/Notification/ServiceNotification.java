@@ -19,7 +19,9 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.trabalho3.Database.CategoriaDAO;
 import com.example.trabalho3.MainActivity;
+import com.example.trabalho3.Models.Categoria;
 import com.example.trabalho3.R;
 
 public class ServiceNotification extends Service {
@@ -49,12 +51,17 @@ public class ServiceNotification extends Service {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                CategoriaDAO categoriaDAO = new CategoriaDAO(getApplicationContext());
+
+                Categoria categoria = categoriaDAO.getCategoriaById(counter);
+
+                if(categoria != null)
+                {
+                    Notification notification = createNotification(categoria.getNome());
+                    startForeground(NOTIFICATION_ID, notification);
+                    NOTIFICATION_ID++;
+                }
                 counter++;
-                NOTIFICATION_ID++;
-                Notification notification = createNotification("Teste: " + counter);
-
-                startForeground(NOTIFICATION_ID, notification);
-
                 handler.postDelayed(this, 5000); // repetir a cada 5 segundos
             }
         }, 5000);
