@@ -23,7 +23,7 @@ import java.util.Locale;
 public class TarefaDAO extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "tasktres.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private static final String TABLE_CATEGORIA = "categorias";
     private static final String TABLE_TAREFA = "tarefa";
@@ -35,6 +35,7 @@ public class TarefaDAO extends SQLiteOpenHelper {
     private static final String COLUMN_SITUACAO = "situacao";
     private static final String COLUMN_CATEGORIA_ID = "categoria_id";
 
+    private static final String COLUMN_NOTIFICACAO = "is_notificado";
     private static final String TABLE_TAREFA_IMAGEM = "tarefa_imagem";
     private static final String COLUMN_TAREFA_ID = "tarefa_id";
     private static final String COLUMN_IMAGEM_DATA = "imagem_data";
@@ -61,6 +62,7 @@ public class TarefaDAO extends SQLiteOpenHelper {
                 COLUMN_DATA_INICIAL + " TEXT, " +
                 COLUMN_DATA_FINAL + " TEXT, " +
                 COLUMN_SITUACAO + " TEXT, " +
+                COLUMN_NOTIFICACAO + " INTEGER DEFAULT 0, " +
                 COLUMN_CATEGORIA_ID + " INTEGER, " +
                 "FOREIGN KEY(" + COLUMN_CATEGORIA_ID + ") REFERENCES " + TABLE_CATEGORIA + "(" + COLUMN_ID + ")" +
                 ")";
@@ -173,8 +175,10 @@ public class TarefaDAO extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 byte[] imagemData = cursor.getBlob(cursor.getColumnIndex(COLUMN_IMAGEM_DATA));
+                int id = cursor.getInt(cursor.getColumnIndex(COLUMN_ID));
+
                 Bitmap bitmap = BitmapFactory.decodeByteArray(imagemData, 0, imagemData.length);
-                Imagem imagem = new Imagem(bitmap);
+                Imagem imagem = new Imagem(bitmap,id);
                 imagens.add(imagem);
             } while (cursor.moveToNext());
         }
@@ -182,6 +186,130 @@ public class TarefaDAO extends SQLiteOpenHelper {
         cursor.close();
         return imagens;
     }
+
+    public List<Tarefa> consultarTarefasVencidas() {
+        SQLiteDatabase db = getReadableDatabase();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String dataAtual = dateFormat.format(new Date());
+
+        String query = "SELECT " +
+                COLUMN_ID + ", " +
+                COLUMN_DESCRICAO + ", " +
+                COLUMN_DATA_FINAL +
+                " FROM " + TABLE_TAREFA +
+                " WHERE " + COLUMN_DATA_FINAL + " < '" + dataAtual + "'"+
+                " AND " + COLUMN_NOTIFICACAO + " = 0";
+
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        List<Tarefa> tarefas = new ArrayList<>();
+
+        while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndex(COLUMN_ID));
+            String descricao = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRICAO));
+            String dataFinal = cursor.getString(cursor.getColumnIndex(COLUMN_DATA_FINAL));
+
+            Tarefa tarefa = new Tarefa();
+            tarefa.setId(id);
+            tarefa.setDescricao(descricao);
+
+            try {
+                Date dataFinalDate = dateFormat.parse(dataFinal);
+                tarefa.setDataFinal(dataFinalDate);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            tarefas.add(tarefa);
+        }
+
+        cursor.close();
+        db.close();
+
+        return tarefas;
+    }
+
+    public void alterarStatusNotificacao(int idTarefa, boolean notificacaoAtiva) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NOTIFICACAO, notificacaoAtiva ? 1 : 0);
+
+        String whereClause = COLUMN_ID + " = ?";
+        String[] whereArgs = {String.valueOf(idTarefa)};
+
+        db.update(TABLE_TAREFA, values, whereClause, whereArgs);
+
+        db.close();
+    }
+
+    public Tarefa getTarefaById(int id) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_TAREFA +
+                " WHERE " + COLUMN_ID + " = " + id;
+
+        Cursor cursor = db.rawQuery(query, null);
+
+        Tarefa tarefa = null;
+
+        if (cursor.moveToFirst()) {
+            int tarefaId = cursor.getInt(cursor.getColumnIndex(COLUMN_ID));
+            String descricao = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRICAO));
+            String observacoes = cursor.getString(cursor.getColumnIndex(COLUMN_OBSERVACOES));
+            String dataInicialString = cursor.getString(cursor.getColumnIndex(COLUMN_DATA_INICIAL));
+            String dataFinalString = cursor.getString(cursor.getColumnIndex(COLUMN_DATA_FINAL));
+            String situacao = cursor.getString(cursor.getColumnIndex(COLUMN_SITUACAO));
+            int categoriaId = cursor.getInt(cursor.getColumnIndex(COLUMN_CATEGORIA_ID));
+
+            CategoriaDAO categoriaDAO = new CategoriaDAO(context);
+            Categoria categoria = categoriaDAO.getCategoriaById(categoriaId);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            Date dataInicial = null;
+            Date dataFinal = null;
+            try {
+                dataInicial = dateFormat.parse(dataInicialString);
+                dataFinal = dateFormat.parse(dataFinalString);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            List<Imagem> imagens = getImagensByTarefaId(id);
+
+            tarefa = new Tarefa(tarefaId, descricao, observacoes, dataInicial, dataFinal, situacao, categoria,imagens);
+        }
+
+        cursor.close();
+        db.close();
+
+        return tarefa;
+    }
+
+    public void removerImagem(int imagemId) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(TABLE_TAREFA_IMAGEM, COLUMN_ID + " = ?", new String[]{String.valueOf(imagemId)});
+        db.close();
+    }
+
+    public int salvarImagem(Imagem imagem, int idTarefa) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        byte[] imagemData = convertBitmapToByteArray(imagem.getBitmap());
+
+        ContentValues imagemValues = new ContentValues();
+        imagemValues.put(COLUMN_TAREFA_ID, idTarefa);
+        imagemValues.put(COLUMN_IMAGEM_DATA, imagemData);
+
+        long imagemId = db.insert(TABLE_TAREFA_IMAGEM, null, imagemValues);
+
+        db.close();
+
+        return (int) imagemId;
+    }
+
 
     private byte[] convertBitmapToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();

@@ -45,6 +45,10 @@ public class ImagemAdapter extends RecyclerView.Adapter<ImagemAdapter.ImagemView
         return listaImagens.size();
     }
 
+    public void setImagens(List<Imagem> listaImagens) {
+        this.listaImagens = listaImagens;
+    }
+
     public class ImagemViewHolder extends RecyclerView.ViewHolder {
         private ImageView imageView;
         private ImageButton buttonDelete;

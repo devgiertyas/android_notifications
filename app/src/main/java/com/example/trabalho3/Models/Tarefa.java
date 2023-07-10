@@ -14,6 +14,7 @@ public class Tarefa {
     private List<Imagem> imagens;
 
     public Tarefa(int id, String descricao, String observacoes, Date dataInicial, Date dataFinal, String situacao, Categoria categoria, List<Imagem> imagens) {
+        this.id = id;
         this.descricao = descricao;
         this.observacoes = observacoes;
         this.dataInicial = dataInicial;
@@ -32,6 +33,40 @@ public class Tarefa {
         this.categoria = categoria;
         this.imagens = imagens;
     }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public void setObservacoes(String observacoes) {
+        this.observacoes = observacoes;
+    }
+
+    public void setDataInicial(Date dataInicial) {
+        this.dataInicial = dataInicial;
+    }
+
+    public void setDataFinal(Date dataFinal) {
+        this.dataFinal = dataFinal;
+    }
+
+    public void setSituacao(String situacao) {
+        this.situacao = situacao;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
+    }
+
+    public  Tarefa()
+    {
+
+    }
+
 
     public int getId() {
         return id;

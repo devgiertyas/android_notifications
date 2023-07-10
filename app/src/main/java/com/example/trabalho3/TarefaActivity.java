@@ -51,6 +51,7 @@ public class TarefaActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA = 1;
     private static final int REQUEST_GALLERY = 2;
     private static final int REQUEST_CAMERA_PERMISSION = 3;
+    private int idTarefa;
 
     private EditText editTextDescricao;
     private Spinner spinnerCategoria;
@@ -92,7 +93,21 @@ public class TarefaActivity extends AppCompatActivity {
         imagemAdapter.setOnDeleteClickListener(new ImagemAdapter.OnDeleteClickListener() {
             @Override
             public void onDeleteClick(int position) {
-                removerImagemDoRecyclerView(position);
+
+                if (idTarefa > 0) {
+                    // Remover imagem do banco de dados
+                    Imagem imagemRemovida = listaImagens.get(position);
+                    if (imagemRemovida.getIdImage() != 0) {
+                        tarefaDAO.removerImagem(imagemRemovida.getIdImage());
+                    }
+
+                    // Remover imagem da lista de imagens
+                    listaImagens.remove(position);
+                    imagemAdapter.notifyDataSetChanged();
+                } else {
+                    // Remover imagem apenas da lista de imagens
+                    removerImagemDoRecyclerView(position);
+                }
             }
         });
 
@@ -130,7 +145,38 @@ public class TarefaActivity extends AppCompatActivity {
 
         CarregarCategorias();
 
+        String idTarefaStr = getIntent().getStringExtra("idTarefa");
+        if (idTarefaStr != null) {
+            idTarefa = Integer.parseInt(idTarefaStr);
+            if (idTarefa != 0) {
+                RecuperarTarefa();
+            }
+        }
     }
+
+    private void RecuperarTarefa() {
+        tarefaDAO = new TarefaDAO(getApplicationContext());
+
+        Tarefa tarefaSelecionada = tarefaDAO.getTarefaById(idTarefa);
+
+        if (tarefaSelecionada != null) {
+            editTextDescricao.setText(tarefaSelecionada.getDescricao());
+            editTextObservacoes.setText(tarefaSelecionada.getObservacoes());
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            String dataInicialFormatada = dateFormat.format(tarefaSelecionada.getDataInicial());
+            editTextDataInicial.setText(dataInicialFormatada);
+
+            // Formatar a data final
+            String dataFinalFormatada = dateFormat.format(tarefaSelecionada.getDataFinal());
+            editTextDataFinal.setText(dataFinalFormatada);
+
+            listaImagens = tarefaSelecionada.getImagens();
+            imagemAdapter.setImagens(listaImagens); // Atualizar as imagens do adaptador existente
+            imagemAdapter.notifyDataSetChanged();
+        }
+    }
+
 
     private void CarregarCategorias()
     {
@@ -199,9 +245,23 @@ public class TarefaActivity extends AppCompatActivity {
     }
 
     private void adicionarImagemAoRecyclerView(Bitmap imageBitmap) {
-        Imagem imagem = new Imagem(imageBitmap);
-        listaImagens.add(imagem);
-        imagemAdapter.notifyDataSetChanged();
+        Imagem imagem = new Imagem(imageBitmap, 0);
+
+        if (idTarefa > 0) {
+            tarefaDAO = new TarefaDAO(getApplicationContext());
+            int imagemId = tarefaDAO.salvarImagem(imagem, idTarefa);
+
+            if (imagemId != -1) {
+                imagem.setIdImage(imagemId);
+                listaImagens.add(imagem);
+                imagemAdapter.notifyDataSetChanged();
+            }
+        }
+        else
+        {
+            listaImagens.add(imagem);
+            imagemAdapter.notifyDataSetChanged();
+        }
     }
 
     private void removerImagemDoRecyclerView(int position) {

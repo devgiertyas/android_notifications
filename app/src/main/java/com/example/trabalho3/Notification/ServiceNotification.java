@@ -20,16 +20,19 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.trabalho3.Database.CategoriaDAO;
+import com.example.trabalho3.Database.TarefaDAO;
 import com.example.trabalho3.MainActivity;
 import com.example.trabalho3.Models.Categoria;
+import com.example.trabalho3.Models.Tarefa;
 import com.example.trabalho3.R;
+
+import java.util.List;
 
 public class ServiceNotification extends Service {
 
     private static final String TAG = "ServiceNotification";
     private int NOTIFICATION_ID = 1;
     private static final String CHANNEL_ID = "ForegroundServiceChannel";
-    private int counter = 0;
     private boolean isServiceRunning = false;
 
     @Override
@@ -46,25 +49,29 @@ public class ServiceNotification extends Service {
 
         createNotificationChannel();
 
+        startForeground(NOTIFICATION_ID, createNotification("Task Manager Executando.", "Notificação"));
+
         // Exemplo: exibindo uma notificação a cada 5 segundos
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                CategoriaDAO categoriaDAO = new CategoriaDAO(getApplicationContext());
+                TarefaDAO tarefaDAO = new TarefaDAO(getApplicationContext());
 
-                Categoria categoria = categoriaDAO.getCategoriaById(counter);
+                List<Tarefa> listaTarefas = tarefaDAO.consultarTarefasVencidas();
 
-                if(categoria != null)
+                if(listaTarefas.size() > 0)
                 {
-                    Notification notification = createNotification(categoria.getNome());
-                    startForeground(NOTIFICATION_ID, notification);
-                    NOTIFICATION_ID++;
+                    for (Tarefa tarefa : listaTarefas) {
+                        NOTIFICATION_ID = tarefa.getId();
+                        Notification notification = createNotification(tarefa.getDescricao(), "Atenção! Sua tarefa está vencida.");
+                        startForeground(NOTIFICATION_ID, notification);
+                        tarefaDAO.alterarStatusNotificacao(tarefa.getId(), true);
+                    }
                 }
-                counter++;
-                handler.postDelayed(this, 5000); // repetir a cada 5 segundos
+                handler.postDelayed(this, 10000); // repetir a cada 10 segundos
             }
-        }, 5000);
+        }, 10000);
 
         isServiceRunning = true;
         return START_STICKY;
@@ -98,16 +105,16 @@ public class ServiceNotification extends Service {
         }
     }
 
-    private Notification createNotification(String message) {
+    private Notification createNotification(String message, String title) {
         Context context = getApplicationContext();
 
         Intent notificationIntent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Foreground Service")
+                .setContentTitle(title)
                 .setContentText(message)
-                .setSmallIcon(R.drawable.ic_menu_camera)
+                .setSmallIcon(R.drawable.baseline_notification_important_24)
                 .setContentIntent(pendingIntent)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_CALL);

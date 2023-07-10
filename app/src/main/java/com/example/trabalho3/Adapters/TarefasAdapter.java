@@ -1,6 +1,7 @@
 package com.example.trabalho3.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.trabalho3.CategoriaActivity;
+import com.example.trabalho3.Models.Categoria;
 import com.example.trabalho3.Models.Tarefa;
 import com.example.trabalho3.R;
 
@@ -16,56 +19,102 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
-public class TarefasAdapter extends RecyclerView.Adapter<TarefasAdapter.TarefaViewHolder> {
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.trabalho3.CategoriaActivity;
+import com.example.trabalho3.MainActivity;
+import com.example.trabalho3.Models.Categoria;
+import com.example.trabalho3.R;
+import com.example.trabalho3.TarefaActivity;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class TarefasAdapter extends RecyclerView.Adapter<TarefasAdapter.ViewHolder>{
     private List<Tarefa> listaTarefas;
     private SimpleDateFormat dateFormat;
     Context context;
 
-    public TarefasAdapter(List<Tarefa> listaTarefas, Context context) {
+    public TarefasAdapter(List<Tarefa> listaTarefas, Context context ){
         this.listaTarefas = listaTarefas;
         this.context = context;
         this.dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
     }
 
-    @NonNull
     @Override
-    public TarefaViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
-        View view = LayoutInflater.from(context).inflate(R.layout.item_tarefa, parent, false);
-        return new TarefaViewHolder(view);
+    public TarefasAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View cell = null;
+        if (parent != null) {
+            this.context = parent.getContext();
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            cell = inflater.inflate(R.layout.item_tarefa, parent, false);
+        }
+        return new ViewHolder(cell);
+
     }
 
     @Override
-    public void onBindViewHolder(@NonNull TarefaViewHolder holder, int position) {
-        Tarefa tarefa = listaTarefas.get(position);
-        holder.bind(tarefa);
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        if (holder != null){
+
+
+            holder.textViewDescricao.setText(listaTarefas.get(holder.getAdapterPosition()).getDescricao());
+            holder.textViewDataInicial.setText("Data Inicial: " + dateFormat.format(listaTarefas.get(holder.getAdapterPosition()).getDataInicial()));
+            holder.textViewDataFinal.setText("Data Final: " + dateFormat.format(listaTarefas.get(holder.getAdapterPosition()).getDataFinal()));
+            holder.textViewSituacao.setText("Situação: " + listaTarefas.get(holder.getAdapterPosition()).getSituacao());
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    TarefaActivity man = new  TarefaActivity();
+
+                    Intent it = new Intent(context.getApplicationContext(), TarefaActivity.class);
+                    String id = String.valueOf(listaTarefas.get(holder.getAdapterPosition()).getId());
+                    it.putExtra("idTarefa",id);
+                    context.startActivity(it);
+                }
+            });
+
+
+        }
     }
+
 
     @Override
     public int getItemCount() {
         return listaTarefas.size();
     }
 
-    public class TarefaViewHolder extends RecyclerView.ViewHolder {
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+
         private TextView textViewDescricao;
         private TextView textViewDataInicial;
         private TextView textViewDataFinal;
         private TextView textViewSituacao;
 
-        public TarefaViewHolder(@NonNull View itemView) {
+        public ViewHolder(View itemView) {
             super(itemView);
-            textViewDescricao = itemView.findViewById(R.id.textViewDescricao);
-            textViewDataInicial = itemView.findViewById(R.id.textViewDataInicial);
-            textViewDataFinal = itemView.findViewById(R.id.textViewDataFinal);
-            textViewSituacao = itemView.findViewById(R.id.textViewSituacao);
-        }
 
-        public void bind(Tarefa tarefa) {
-            textViewDescricao.setText(tarefa.getDescricao());
-            textViewDataInicial.setText("Data Inicial: " + dateFormat.format(tarefa.getDataInicial()));
-            textViewDataFinal.setText("Data Final: " + dateFormat.format(tarefa.getDataFinal()));
-            textViewSituacao.setText("Situação: " + tarefa.getSituacao());
+            if (itemView != null){
+                textViewDescricao = itemView.findViewById(R.id.textViewDescricao);
+                textViewDataInicial = itemView.findViewById(R.id.textViewDataInicial);
+                textViewDataFinal = itemView.findViewById(R.id.textViewDataFinal);
+                textViewSituacao = itemView.findViewById(R.id.textViewSituacao);
+            }
+
         }
     }
 }
+
+
+
+

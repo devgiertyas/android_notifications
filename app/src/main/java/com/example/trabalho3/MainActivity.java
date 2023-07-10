@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         //INICIA O SERVIÇO PRA VERIFICAR OS AGENDAMOS
-        /*
+
         Intent serviceIntent = new Intent(this, ServiceNotification.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ContextCompat.startForegroundService(this, serviceIntent);
@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
             // Antes do Android 8.0, use startService()
             startService(serviceIntent);
         }
-        */
 
         setSupportActionBar(binding.appBarMain.toolbar);
         binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
@@ -55,10 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
                 int checkedItemId = menu.findItem(navigationView.getCheckedItem().getItemId()).getItemId();
 
-                if (checkedItemId == R.id.nav_home) {
-                    // Item 1 do Navigation Drawer está ativo
-                    Snackbar.make(view, "Ação do Item 1", Snackbar.LENGTH_LONG).show();
-                } else if (checkedItemId == R.id.nav_gallery) {
+                if (checkedItemId == R.id.nav_gallery) {
                     Intent intent = new Intent(MainActivity.this, TarefaActivity.class);
                     startActivity(intent);
                 } else if (checkedItemId == R.id.nav_slideshow) {
@@ -78,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
+                R.id.nav_gallery, R.id.nav_slideshow)
                 .setOpenableLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);

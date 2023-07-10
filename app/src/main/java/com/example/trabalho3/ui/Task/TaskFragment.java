@@ -60,4 +60,12 @@ public class TaskFragment extends Fragment {
         super.onDestroyView();
         binding = null;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        CarregarTarefas();
+    }
+
 }
