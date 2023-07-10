@@ -164,12 +164,17 @@ public class TarefaActivity extends AppCompatActivity {
             editTextObservacoes.setText(tarefaSelecionada.getObservacoes());
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-            String dataInicialFormatada = dateFormat.format(tarefaSelecionada.getDataInicial());
-            editTextDataInicial.setText(dataInicialFormatada);
+            if(tarefaSelecionada.getDataInicial() != null)
+            {
+                String dataInicialFormatada = dateFormat.format(tarefaSelecionada.getDataInicial());
+                editTextDataInicial.setText(dataInicialFormatada);
+            }
 
-            // Formatar a data final
-            String dataFinalFormatada = dateFormat.format(tarefaSelecionada.getDataFinal());
-            editTextDataFinal.setText(dataFinalFormatada);
+
+            if(tarefaSelecionada.getDataFinal() != null) {
+                String dataFinalFormatada = dateFormat.format(tarefaSelecionada.getDataFinal());
+                editTextDataFinal.setText(dataFinalFormatada);
+            }
 
             listaImagens = tarefaSelecionada.getImagens();
             imagemAdapter.setImagens(listaImagens); // Atualizar as imagens do adaptador existente
@@ -313,32 +318,20 @@ public class TarefaActivity extends AppCompatActivity {
                 observacoes,
                 dataInicialParsed,
                 dataFinalParsed,
-                "teste",
+                "Andamento",
                 categoriaSelecionada,
                 listaImagens );
 
         tarefaDAO = new TarefaDAO(getApplicationContext());
 
-        int idTarefe = tarefaDAO.salvarTarefa(tarefa);
-
-        Log.d("Tartega","salvarTarefa: " + idTarefe);
-
-        /* Adicione a lista de imagens da tarefa (caminhos dos arquivos)
-        List<String> imagens = imagemAdapter.getImagens();
-        tarefa.setImagens(imagens);
-
-        // Crie uma instância do TarefaDAO
-        TarefaDAO tarefaDAO = new TarefaDAO(getApplicationContext());
-        // Salve a tarefa no banco de dados
-        long idTarefa = tarefaDAO.salvarTarefa(tarefa);
-
-
-        if (idTarefa != -1) {
-            Toast.makeText(this, "Tarefa salva com sucesso!", Toast.LENGTH_SHORT).show();
-            finish();
-        } else {
-            Toast.makeText(this, "Erro ao salvar tarefa!", Toast.LENGTH_SHORT).show();
-        }*/
+        if(idTarefa > 0)
+        {
+            tarefaDAO.atualizarTarefa(tarefa, idTarefa);
+        }
+        else
+        {
+            tarefaDAO.salvarTarefa(tarefa);
+        }
 
         Toast.makeText(this,"Tarefa salva com sucesso!", Toast.LENGTH_SHORT).show();
         finish();

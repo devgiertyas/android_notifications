@@ -310,6 +310,20 @@ public class TarefaDAO extends SQLiteOpenHelper {
         return (int) imagemId;
     }
 
+    public void atualizarTarefa(Tarefa tarefa, int idTarefa) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_DESCRICAO, tarefa.getDescricao());
+        values.put(COLUMN_OBSERVACOES, tarefa.getObservacoes());
+        values.put(COLUMN_DATA_INICIAL, formatarData(tarefa.getDataInicial()));
+        values.put(COLUMN_DATA_FINAL, formatarData(tarefa.getDataFinal()));
+        values.put(COLUMN_CATEGORIA_ID, tarefa.getCategoria().getId());
+
+        String[] args = {String.valueOf(idTarefa)};
+        db.update(TABLE_TAREFA, values, "id = ?", args);
+
+        db.close();
+    }
 
     private byte[] convertBitmapToByteArray(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();

@@ -67,9 +67,19 @@ public class TarefasAdapter extends RecyclerView.Adapter<TarefasAdapter.ViewHold
 
 
             holder.textViewDescricao.setText(listaTarefas.get(holder.getAdapterPosition()).getDescricao());
-            holder.textViewDataInicial.setText("Data Inicial: " + dateFormat.format(listaTarefas.get(holder.getAdapterPosition()).getDataInicial()));
-            holder.textViewDataFinal.setText("Data Final: " + dateFormat.format(listaTarefas.get(holder.getAdapterPosition()).getDataFinal()));
             holder.textViewSituacao.setText("Situação: " + listaTarefas.get(holder.getAdapterPosition()).getSituacao());
+
+            if (listaTarefas.get(holder.getAdapterPosition()).getDataInicial() != null) {
+                holder.textViewDataInicial.setText("Data Inicial: " + dateFormat.format(listaTarefas.get(holder.getAdapterPosition()).getDataInicial()));
+            } else {
+                holder.textViewDataInicial.setText("Data Inicial: N/A");
+            }
+
+            if (listaTarefas.get(holder.getAdapterPosition()).getDataFinal() != null) {
+                holder.textViewDataFinal.setText("Data Final: " + dateFormat.format(listaTarefas.get(holder.getAdapterPosition()).getDataFinal()));
+            } else {
+                holder.textViewDataFinal.setText("Data Final: N/A");
+            }
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
