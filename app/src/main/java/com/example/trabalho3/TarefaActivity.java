@@ -18,6 +18,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -62,6 +64,8 @@ public class TarefaActivity extends AppCompatActivity {
     private Button buttonSalvar;
     private Button buttonAdicionarImagem;
 
+    private String Situacao  = "Em Andamento";
+
     private ImagemAdapter imagemAdapter;
     private List<Imagem> listaImagens;
 
@@ -69,7 +73,9 @@ public class TarefaActivity extends AppCompatActivity {
     private CategoriaDAO categoriaDAO;
 
     private TarefaDAO tarefaDAO;
-
+    RadioGroup radioGroupSituacao;
+    RadioButton radioButtonAndamento;
+    RadioButton radioButtonConcluido;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +88,10 @@ public class TarefaActivity extends AppCompatActivity {
         recyclerViewImagens = findViewById(R.id.recyclerViewImagens);
         buttonSalvar = findViewById(R.id.buttonSalvar);
         buttonAdicionarImagem = findViewById(R.id.buttonAdicionarImagem);
+
+        radioGroupSituacao= findViewById(R.id.radioGroupSituacao);
+        radioButtonAndamento = findViewById(R.id.radioButtonAndamento);
+        radioButtonConcluido = findViewById(R.id.radioButtonConcluido);
 
         listaImagens = new ArrayList<>();
         imagemAdapter = new ImagemAdapter(listaImagens);
@@ -107,6 +117,17 @@ public class TarefaActivity extends AppCompatActivity {
                 } else {
                     // Remover imagem apenas da lista de imagens
                     removerImagemDoRecyclerView(position);
+                }
+            }
+        });
+
+        radioGroupSituacao.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == radioButtonAndamento.getId()) {
+                    Situacao = "Em Andamento";
+                } else if (checkedId == radioButtonConcluido.getId()) {
+                    Situacao = "Concluído";
                 }
             }
         });
@@ -169,6 +190,18 @@ public class TarefaActivity extends AppCompatActivity {
                 String dataInicialFormatada = dateFormat.format(tarefaSelecionada.getDataInicial());
                 editTextDataInicial.setText(dataInicialFormatada);
             }
+
+            if(tarefaSelecionada.getSituacao() != null)
+            {
+                if (tarefaSelecionada.getSituacao().equals("Em Andamento")) {
+                    Situacao = "Em Andamento";
+                    radioButtonAndamento.setChecked(true);
+                } else if (tarefaSelecionada.getSituacao().equals("Concluído")) {
+                    radioButtonConcluido.setChecked(true);
+                    Situacao = "Concluído";
+                }
+            }
+
 
 
             if(tarefaSelecionada.getDataFinal() != null) {
@@ -318,7 +351,7 @@ public class TarefaActivity extends AppCompatActivity {
                 observacoes,
                 dataInicialParsed,
                 dataFinalParsed,
-                "Andamento",
+                Situacao,
                 categoriaSelecionada,
                 listaImagens );
 

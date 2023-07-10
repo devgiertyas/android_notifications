@@ -23,7 +23,7 @@ import java.util.Locale;
 public class TarefaDAO extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "tasktres.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     private static final String TABLE_CATEGORIA = "categorias";
     private static final String TABLE_TAREFA = "tarefa";
@@ -199,7 +199,8 @@ public class TarefaDAO extends SQLiteOpenHelper {
                 COLUMN_DATA_FINAL +
                 " FROM " + TABLE_TAREFA +
                 " WHERE " + COLUMN_DATA_FINAL + " < '" + dataAtual + "'"+
-                " AND " + COLUMN_NOTIFICACAO + " = 0";
+                " AND " + COLUMN_NOTIFICACAO + " = 0" +
+                " AND " + COLUMN_SITUACAO + " = 'Em Andamento' ";
 
 
         Cursor cursor = db.rawQuery(query, null);
@@ -318,6 +319,7 @@ public class TarefaDAO extends SQLiteOpenHelper {
         values.put(COLUMN_DATA_INICIAL, formatarData(tarefa.getDataInicial()));
         values.put(COLUMN_DATA_FINAL, formatarData(tarefa.getDataFinal()));
         values.put(COLUMN_CATEGORIA_ID, tarefa.getCategoria().getId());
+        values.put(COLUMN_SITUACAO, tarefa.getSituacao());
         values.put(COLUMN_NOTIFICACAO, 0);
 
 

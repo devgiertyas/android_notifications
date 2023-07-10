@@ -4,24 +4,65 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="16dp"
     tools:context=".TarefaActivity">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Descrição" />
     <EditText
         android:id="@+id/editTextDescricao"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:hint="Descrição" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Situação" />
+
+    <RadioGroup
+        android:id="@+id/radioGroupSituacao"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radioButtonAndamento"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Em Andamento" />
+
+        <RadioButton
+            android:id="@+id/radioButtonConcluido"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Concluído" />
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Categoria" />
 
     <Spinner
         android:id="@+id/spinnerCategoria"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:hint="Categoria" />
+        android:hint="Selecione a Categoria" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Data Inicial:" />
 
         <EditText
             android:id="@+id/editTextDataInicial"
@@ -31,6 +72,19 @@
             android:ems="10"
             android:inputType="date"
             android:hint="Data Inicial" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Data Final:" />
 
         <EditText
             android:id="@+id/editTextDataFinal"
@@ -42,6 +96,10 @@
 
     </LinearLayout>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Observações" />
     <EditText
         android:id="@+id/editTextObservacoes"
         android:layout_width="match_parent"
@@ -76,6 +134,5 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:text="Salvar" />
-
 
 </LinearLayout>

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class CategoriaDAO extends SQLiteOpenHelper {
         private static final String DATABASE_NAME = "tasktres.db";
-        private static final int DATABASE_VERSION = 2;
+        private static final int DATABASE_VERSION = 3;
         private static final String TABLE_CATEGORIAS = "categorias";
         private static final String COLUMN_ID = "id";
         private static final String COLUMN_NOME = "nome";
