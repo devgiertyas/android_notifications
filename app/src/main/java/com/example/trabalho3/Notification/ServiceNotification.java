@@ -25,6 +25,7 @@ import com.example.trabalho3.MainActivity;
 import com.example.trabalho3.Models.Categoria;
 import com.example.trabalho3.Models.Tarefa;
 import com.example.trabalho3.R;
+import com.example.trabalho3.TarefaActivity;
 
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class ServiceNotification extends Service {
 
         createNotificationChannel();
 
-        startForeground(NOTIFICATION_ID, createNotification("Task Manager Executando.", "Notificação"));
+        startForeground(NOTIFICATION_ID, createNotification("Task Manager Executando.", "Notificação",0));
 
         // Exemplo: exibindo uma notificação a cada 5 segundos
         Handler handler = new Handler();
@@ -64,7 +65,10 @@ public class ServiceNotification extends Service {
                 {
                     for (Tarefa tarefa : listaTarefas) {
                         NOTIFICATION_ID = tarefa.getId();
-                        Notification notification = createNotification(tarefa.getDescricao(), "Atenção! Sua tarefa está vencida.");
+                        Notification notification = createNotification("A tarefa: "
+                                        + tarefa.getDescricao()+
+                                        " está com o prazo atrasado.",
+                                "Atenção!",tarefa.getId());
                         startForeground(NOTIFICATION_ID, notification);
                         tarefaDAO.alterarStatusNotificacao(tarefa.getId(), true);
                     }
@@ -105,21 +109,42 @@ public class ServiceNotification extends Service {
         }
     }
 
-    private Notification createNotification(String message, String title) {
+    private Notification createNotification(String message, String title, int idTarefa) {
         Context context = getApplicationContext();
 
-        Intent notificationIntent = new Intent(context, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+        if(idTarefa > 0)
+        {
+            Intent notificationIntent = new Intent(context, TarefaActivity.class);
+            String id = String.valueOf(idTarefa);
+            notificationIntent.putExtra("idTarefa",id);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle(title)
-                .setContentText(message)
-                .setSmallIcon(R.drawable.baseline_notification_important_24)
-                .setContentIntent(pendingIntent)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_CALL);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setSmallIcon(R.drawable.baseline_notification_important_24)
+                    .setContentIntent(pendingIntent)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_CALL);
 
-        return builder.build();
+            return builder.build();
+        }
+        else
+        {
+            Intent notificationIntent = new Intent(context, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setSmallIcon(R.drawable.baseline_notification_important_24)
+                    .setContentIntent(pendingIntent)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_CALL);
+
+            return builder.build();
+        }
+
     }
 }
 

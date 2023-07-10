@@ -318,6 +318,8 @@ public class TarefaDAO extends SQLiteOpenHelper {
         values.put(COLUMN_DATA_INICIAL, formatarData(tarefa.getDataInicial()));
         values.put(COLUMN_DATA_FINAL, formatarData(tarefa.getDataFinal()));
         values.put(COLUMN_CATEGORIA_ID, tarefa.getCategoria().getId());
+        values.put(COLUMN_NOTIFICACAO, 0);
+
 
         String[] args = {String.valueOf(idTarefa)};
         db.update(TABLE_TAREFA, values, "id = ?", args);
