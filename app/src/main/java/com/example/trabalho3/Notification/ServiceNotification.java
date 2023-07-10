@@ -32,7 +32,7 @@ import java.util.List;
 public class ServiceNotification extends Service {
 
     private static final String TAG = "ServiceNotification";
-    private int NOTIFICATION_ID = 1;
+    private int NOTIFICATION_ID = 99;
     private static final String CHANNEL_ID = "ForegroundServiceChannel";
     private boolean isServiceRunning = false;
 
@@ -65,11 +65,10 @@ public class ServiceNotification extends Service {
                 {
                     for (Tarefa tarefa : listaTarefas) {
                         NOTIFICATION_ID = tarefa.getId();
-                        Notification notification = createNotification("A tarefa: "
+                        startForeground(tarefa.getId(), createNotification("A tarefa: "
                                         + tarefa.getDescricao()+
                                         " está com o prazo atrasado.",
-                                "Atenção!",tarefa.getId());
-                        startForeground(NOTIFICATION_ID, notification);
+                                "Atenção!",tarefa.getId()));
                         tarefaDAO.alterarStatusNotificacao(tarefa.getId(), true);
                     }
                 }
@@ -117,7 +116,9 @@ public class ServiceNotification extends Service {
             Intent notificationIntent = new Intent(context, TarefaActivity.class);
             String id = String.valueOf(idTarefa);
             notificationIntent.putExtra("idTarefa",id);
-            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+            notificationIntent.putExtra("notification", "true");
+
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, idTarefa, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                     .setContentTitle(title)

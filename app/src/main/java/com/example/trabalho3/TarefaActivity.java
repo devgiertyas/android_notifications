@@ -3,7 +3,9 @@ package com.example.trabalho3;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.NotificationManager;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -54,7 +56,7 @@ public class TarefaActivity extends AppCompatActivity {
     private static final int REQUEST_GALLERY = 2;
     private static final int REQUEST_CAMERA_PERMISSION = 3;
     private int idTarefa;
-
+    private int notificationId;
     private EditText editTextDescricao;
     private Spinner spinnerCategoria;
     private EditText editTextDataInicial;
@@ -167,8 +169,15 @@ public class TarefaActivity extends AppCompatActivity {
         CarregarCategorias();
 
         String idTarefaStr = getIntent().getStringExtra("idTarefa");
+        String viaNotificaion = getIntent().getStringExtra("notification");
         if (idTarefaStr != null) {
             idTarefa = Integer.parseInt(idTarefaStr);
+
+            if(viaNotificaion != null)
+            {
+                notificationId = idTarefa;
+            }
+
             if (idTarefa != 0) {
                 RecuperarTarefa();
             }
@@ -259,6 +268,15 @@ public class TarefaActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
         startActivityForResult(intent, REQUEST_GALLERY);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (notificationId > 0) {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(notificationId);
+        }
     }
 
     @Override
